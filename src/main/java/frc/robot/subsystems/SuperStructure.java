@@ -7,44 +7,47 @@ package frc.robot.subsystems;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 public class SuperStructure extends SubsystemBase {
-  
+
   private SuperStructureState currentState = SuperStructureState.DEFAULT_STATE;
   private SuperStructureState desiredState = SuperStructureState.DEFAULT_STATE;
   private SuperStructureStatus currentStatus = SuperStructureStatus.IDLE;
 
   public enum SuperStructureState {
-      DEFAULT_STATE,
-      INTAKE_UPRIGHT,
-      INTAKE_UPSIDE_DOWN,
-      HOLDING,
-      OUTTAKING,
+    DEFAULT_STATE,
+    INTAKE_UPRIGHT,
+    INTAKE_UPSIDE_DOWN,
+    HOLDING,
+    OUTTAKING,
   }
+
   public enum SuperStructureStatus {
-      IDLE,
-      TRANSITIONING,
-      ERROR,
+    IDLE,
+    TRANSITIONING,
+    ERROR,
   }
 
   public void setDesiredState(SuperStructureState state) {
-      if (state != currentState) {
-          currentStatus = SuperStructureStatus.TRANSITIONING;
-      }
-      this.desiredState = state;
+    if (state != currentState) {
+      currentStatus = SuperStructureStatus.TRANSITIONING;
+    }
+    this.desiredState = state;
   }
+
   public SuperStructureState getDesiredState() {
-      return this.desiredState;
+    return this.desiredState;
   }
+
   public SuperStructureState getCurrentState() {
-      return this.currentState;
+    return this.currentState;
   }
+
   public boolean atDesiredState() {
-      return (this.currentState == this.desiredState) && (this.currentStatus == SuperStructureStatus.IDLE);
+    return (this.currentState == this.desiredState)
+        && (this.currentStatus == SuperStructureStatus.IDLE);
   }
 
   /** Creates a new SuperStructure. */
   public SuperStructure() {}
-
-
 
   @Override
   public void periodic() {
