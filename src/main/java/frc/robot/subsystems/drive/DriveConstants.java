@@ -36,15 +36,11 @@ public class DriveConstants {
   public static final DCMotor gearbox = DCMotor.getCIM(1);
 
   // Velocity PID configuration
-  public static final double realKp = 0.0;
-  public static final double realKd = 0.0;
-  public static final double realKs = 0.0;
-  public static final double realKv = 0.1;
+  public static final double REAL_P = 0.0;
+  public static final double REAL_D = 0.0;
+  public static final double REAL_S = 0.0;
+  public static final double REAL_V = 0.1;
 
-  public static final double simKp = 0.05;
-  public static final double simKd = 0.0;
-  public static final double simKs = 0.0;
-  public static final double simKv = 0.227;
 
   // PathPlanner configuration
   public static final double robotMassKg = 74.088;

@@ -46,8 +46,8 @@ public class Drive extends SubsystemBase {
 
   private final DifferentialDriveKinematics kinematics =
       new DifferentialDriveKinematics(trackWidth);
-  private final double kS = Constants.currentMode == Mode.SIM ? simKs : realKs;
-  private final double kV = Constants.currentMode == Mode.SIM ? simKv : realKv;
+  private static final double kS = REAL_S;
+  private static final double kV = REAL_V;
   private final DifferentialDrivePoseEstimator poseEstimator =
       new DifferentialDrivePoseEstimator(kinematics, new Rotation2d(), 0.0, 0.0, new Pose2d());
   private final SysIdRoutine sysId;
@@ -214,4 +214,6 @@ public class Drive extends SubsystemBase {
   public double getCharacterizationVelocity() {
     return (inputs.leftVelocityRadPerSec + inputs.rightVelocityRadPerSec) / 2.0;
   }
+
+  
 }

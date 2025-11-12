@@ -18,6 +18,7 @@ public interface ArmIO {
     public double rightVelocityRadPerSec = 0.0;
     public double rightAppliedVolts = 0.0;
     public double rightCurrentAmps = 0.0;
+
   }
 
   /** Updates the set of loggable inputs. */

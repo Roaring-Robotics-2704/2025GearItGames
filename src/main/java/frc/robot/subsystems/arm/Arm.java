@@ -8,6 +8,9 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 public class Arm extends SubsystemBase {
   /** Creates a new Arm. */
+  private ArmIOInputsAutoLogged inputs = new ArmIOInputsAutoLogged();
+
+  
   public Arm() {}
 
   @Override

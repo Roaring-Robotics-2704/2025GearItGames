@@ -30,8 +30,8 @@ public class DriveIOSim implements DriveIO {
   private double leftAppliedVolts = 0.0;
   private double rightAppliedVolts = 0.0;
   private boolean closedLoop = false;
-  private PIDController leftPID = new PIDController(simKp, 0.0, simKd);
-  private PIDController rightPID = new PIDController(simKp, 0.0, simKd);
+  private PIDController leftPID = new PIDController(REAL_P, 0.0, REAL_D);
+  private PIDController rightPID = new PIDController(REAL_P, 0.0, REAL_D);
   private double leftFFVolts = 0.0;
   private double rightFFVolts = 0.0;
 

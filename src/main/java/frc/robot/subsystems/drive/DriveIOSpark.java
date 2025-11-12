@@ -45,7 +45,7 @@ public class DriveIOSpark implements DriveIO {
     // Create config
     var config = new SparkMaxConfig();
     config.idleMode(IdleMode.kBrake).smartCurrentLimit(currentLimit).voltageCompensation(12.0);
-    config.closedLoop.pidf(realKp, 0.0, realKd, 0.0);
+    config.closedLoop.pidf(REAL_D, 0.0, REAL_D, 0.0);
     config
         .encoder
         .positionConversionFactor(2 * Math.PI / motorReduction) // Rotor Rotations -> Wheel Radians

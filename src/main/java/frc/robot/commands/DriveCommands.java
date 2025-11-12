@@ -43,8 +43,8 @@ public class DriveCommands {
     return Commands.run(
         () -> {
           // Apply deadband
-          double x = MathUtil.applyDeadband(xSupplier.getAsDouble(), DEADBAND);
-          double z = MathUtil.applyDeadband(zSupplier.getAsDouble(), DEADBAND);
+          double x = MathUtil.applyDeadband(-xSupplier.getAsDouble(), DEADBAND);
+          double z = MathUtil.applyDeadband(-zSupplier.getAsDouble(), DEADBAND);
 
           x = x * Constants.driveSpeedMultiplier; // Scale forward speed
           z = z * Constants.driveTurnMultiplier; // Scale turning speed
