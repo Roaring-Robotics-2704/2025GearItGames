@@ -29,5 +29,4 @@ public class Arm extends SubsystemBase {
 	public boolean atSetpoint() {
 		return armIO.atSetpoint();
 	}
-	//TODO: add state space control
 }

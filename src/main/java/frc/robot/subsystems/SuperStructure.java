@@ -4,7 +4,12 @@
 
 package frc.robot.subsystems;
 
+import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.subsystems.arm.Arm;
+import static frc.robot.subsystems.SuperStructureConstants.SuperStructureState;
+import static frc.robot.subsystems.SuperStructureConstants.SuperStructureStatus;
+import edu.wpi.first.wpilibj2.command.Commands;
 
 public class SuperStructure extends SubsystemBase {
 
@@ -12,28 +17,22 @@ public class SuperStructure extends SubsystemBase {
   private SuperStructureState desiredState = SuperStructureState.DEFAULT_STATE;
   private SuperStructureStatus currentStatus = SuperStructureStatus.IDLE;
 
+  //Subsystems
+  Arm arm;
+
     /** Creates a new SuperStructure. */
-    public SuperStructure() {}
-
-  public enum SuperStructureState {
-    DEFAULT_STATE,
-    INTAKE_UPRIGHT,
-    INTAKE_UPSIDE_DOWN,
-    HOLDING,
-    OUTTAKING,
-  }
-
-  public enum SuperStructureStatus {
-    IDLE,
-    TRANSITIONING,
-    ERROR,
-  }
+    public SuperStructure(Arm arm) {
+        this.arm = arm;
+    }
 
   public void setDesiredState(SuperStructureState state) {
     if (state != currentState) {
       currentStatus = SuperStructureStatus.TRANSITIONING;
     }
     this.desiredState = state;
+  }
+  public Command gotoState(SuperStructureState state) {
+    return Commands.run(() -> setDesiredState(state), this).until(this::atDesiredState);
   }
 
   public SuperStructureState getDesiredState() {
@@ -53,6 +52,18 @@ public class SuperStructure extends SubsystemBase {
 
   @Override
   public void periodic() {
-    // This method will be called once per scheduler run
+    if (currentState != desiredState ) {
+      if (!arm.atSetpoint()) {
+        arm.setArmAngle(desiredState.getArmAngle());
+      }
+    }
+
+      if (arm.atSetpoint()) {
+        currentState = desiredState;
+        currentStatus = SuperStructureStatus.IDLE;
+      }
+
+    
+    }
   }
-}
+

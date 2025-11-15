@@ -15,6 +15,10 @@ package frc.robot.subsystems.drive;
 
 import static frc.robot.subsystems.drive.DriveConstants.*;
 import static frc.robot.util.SparkUtil.*;
+import static edu.wpi.first.units.Units.Amps;
+import static edu.wpi.first.units.Units.Radians;
+import static edu.wpi.first.units.Units.RadiansPerSecond;
+import static edu.wpi.first.units.Units.Volts;
 
 import com.revrobotics.RelativeEncoder;
 import com.revrobotics.spark.ClosedLoopSlot;
@@ -26,6 +30,8 @@ import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.SparkMax;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import com.revrobotics.spark.config.SparkMaxConfig;
+import edu.wpi.first.units.measure.AngularVelocity;
+import edu.wpi.first.units.measure.Voltage;
 import java.util.function.DoubleSupplier;
 
 /**
@@ -44,7 +50,7 @@ public class DriveIOSpark implements DriveIO {
   public DriveIOSpark() {
     // Create config
     var config = new SparkMaxConfig();
-    config.idleMode(IdleMode.kBrake).smartCurrentLimit(currentLimit).voltageCompensation(12.0);
+    config.idleMode(IdleMode.kBrake).smartCurrentLimit((int)currentLimit.in(Amps) /*this cast to an int might not be the safest idea, but it fixes a type mismatch*/).voltageCompensation(12.0);
     config.closedLoop.pidf(REAL_D, 0.0, REAL_D, 0.0);
     config
         .encoder
@@ -73,35 +79,35 @@ public class DriveIOSpark implements DriveIO {
 
   @Override
   public void updateInputs(DriveIOInputs inputs) {
-    ifOk(leftLeader, leftEncoder::getPosition, (value) -> inputs.leftPositionRad = value);
-    ifOk(leftLeader, leftEncoder::getVelocity, (value) -> inputs.leftVelocityRadPerSec = value);
+    ifOk(leftLeader, leftEncoder::getPosition, value -> inputs.leftPosition.mut_replace(Radians.of(value)));
+    ifOk(leftLeader, leftEncoder::getVelocity, value -> inputs.leftAngularVelocity.mut_replace(RadiansPerSecond.of(value)));
     ifOk(
         leftLeader,
         new DoubleSupplier[] {leftLeader::getAppliedOutput, leftLeader::getBusVoltage},
-        (values) -> inputs.leftAppliedVolts = values[0] * values[1]);
-    ifOk(leftLeader, leftLeader::getOutputCurrent, (value) -> inputs.leftCurrentAmps = value);
+        values -> inputs.leftAppliedVoltage.mut_replace(Volts.of(values[0] * values[1])));
+    ifOk(leftLeader, leftLeader::getOutputCurrent, value -> inputs.leftCurrent.mut_replace(Amps.of(value)));
 
-    ifOk(rightLeader, rightEncoder::getPosition, (value) -> inputs.rightPositionRad = value);
-    ifOk(rightLeader, rightEncoder::getVelocity, (value) -> inputs.rightVelocityRadPerSec = value);
+    ifOk(rightLeader, rightEncoder::getPosition, value -> inputs.rightPosition.mut_replace(Radians.of(value)));
+    ifOk(rightLeader, rightEncoder::getVelocity, value -> inputs.rightAngularVelocity.mut_replace(RadiansPerSecond.of(value)));
     ifOk(
         rightLeader,
         new DoubleSupplier[] {rightLeader::getAppliedOutput, rightLeader::getBusVoltage},
-        (values) -> inputs.rightAppliedVolts = values[0] * values[1]);
-    ifOk(rightLeader, rightLeader::getOutputCurrent, (value) -> inputs.rightCurrentAmps = value);
+        values -> inputs.rightAppliedVoltage.mut_replace(Volts.of(values[0] * values[1])));
+    ifOk(rightLeader, rightLeader::getOutputCurrent, value -> inputs.rightCurrent.mut_replace(Amps.of(value)));
   }
 
   @Override
-  public void setVoltage(double leftVolts, double rightVolts) {
-    leftLeader.setVoltage(leftVolts);
-    rightLeader.setVoltage(rightVolts);
+  public void setVoltage(Voltage leftVoltage, Voltage rightVoltage) {
+    leftLeader.setVoltage(leftVoltage.in(Volts));
+    rightLeader.setVoltage(rightVoltage.in(Volts));
   }
 
   @Override
   public void setVelocity(
-      double leftRadPerSec, double rightRadPerSec, double leftFFVolts, double rightFFVolts) {
+      AngularVelocity leftAngularVelocity, AngularVelocity rightAngularVelocity, Voltage leftFFVoltage, Voltage rightFFVoltage) {
     leftController.setReference(
-        leftRadPerSec, ControlType.kVelocity, ClosedLoopSlot.kSlot0, leftFFVolts);
+        leftAngularVelocity.in(RadiansPerSecond), ControlType.kVelocity, ClosedLoopSlot.kSlot0, leftFFVoltage.in(Volts));
     rightController.setReference(
-        rightRadPerSec, ControlType.kVelocity, ClosedLoopSlot.kSlot0, rightFFVolts);
+        rightAngularVelocity.in(RadiansPerSecond), ControlType.kVelocity, ClosedLoopSlot.kSlot0, rightFFVoltage.in(Volts));
   }
 }

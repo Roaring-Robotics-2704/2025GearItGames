@@ -16,6 +16,8 @@ package frc.robot.subsystems.drive;
 import static edu.wpi.first.units.Units.*;
 import static frc.robot.subsystems.drive.DriveConstants.*;
 
+import javax.sound.sampled.Line;
+
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.controllers.PPLTVController;
 import com.pathplanner.lib.pathfinding.Pathfinding;
@@ -27,6 +29,11 @@ import edu.wpi.first.math.geometry.Twist2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.DifferentialDriveKinematics;
 import edu.wpi.first.math.kinematics.DifferentialDriveWheelSpeeds;
+import edu.wpi.first.units.measure.Distance;
+import edu.wpi.first.units.measure.LinearVelocity;
+import edu.wpi.first.units.measure.Velocity;
+import edu.wpi.first.units.measure.Voltage;
+import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -52,8 +59,8 @@ public class Drive extends SubsystemBase {
       new DifferentialDrivePoseEstimator(kinematics, new Rotation2d(), 0.0, 0.0, new Pose2d());
   private final SysIdRoutine sysId;
   private Rotation2d rawGyroRotation = new Rotation2d();
-  private double lastLeftPositionMeters = 0.0;
-  private double lastRightPositionMeters = 0.0;
+  private Distance lastLeftPosition = Meter.zero();
+  private Distance lastRightPosition = Meter.zero();
 
   public Drive(DriveIO io, GyroIO gyroIO) {
     this.io = io;
@@ -66,22 +73,22 @@ public class Drive extends SubsystemBase {
         () ->
             kinematics.toChassisSpeeds(
                 new DifferentialDriveWheelSpeeds(
-                    getLeftVelocityMetersPerSec(), getRightVelocityMetersPerSec())),
+                    getLeftVelocity().in(RadiansPerSecond), getRightVelocity().in(RadiansPerSecond))),
         (ChassisSpeeds speeds) -> runClosedLoop(speeds),
-        new PPLTVController(0.02, maxSpeedMetersPerSec),
+        new PPLTVController(0.02, maxSpeed.in(MetersPerSecond)),
         ppConfig,
         () -> DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Red,
         this);
     Pathfinding.setPathfinder(new LocalADStarAK());
     PathPlannerLogging.setLogActivePathCallback(
-        (activePath) -> {
+        activePath -> 
           Logger.recordOutput(
-              "Odometry/Trajectory", activePath.toArray(new Pose2d[activePath.size()]));
-        });
+              "Odometry/Trajectory", activePath.toArray(new Pose2d[activePath.size()]))
+        );
     PathPlannerLogging.setLogTargetPoseCallback(
-        (targetPose) -> {
-          Logger.recordOutput("Odometry/TrajectorySetpoint", targetPose);
-        });
+        targetPose -> 
+          Logger.recordOutput("Odometry/TrajectorySetpoint", targetPose)
+        );
 
     // Configure SysId
     sysId =
@@ -90,9 +97,9 @@ public class Drive extends SubsystemBase {
                 null,
                 null,
                 null,
-                (state) -> Logger.recordOutput("Drive/SysIdState", state.toString())),
+                state -> Logger.recordOutput("Drive/SysIdState", state.toString())),
             new SysIdRoutine.Mechanism(
-                (voltage) -> runOpenLoop(voltage.in(Volts), voltage.in(Volts)), null, this));
+                voltage -> runOpenLoop(voltage, voltage), null, this));
   }
 
   @Override
@@ -110,43 +117,43 @@ public class Drive extends SubsystemBase {
       // Use the angle delta from the kinematics and module deltas
       Twist2d twist =
           kinematics.toTwist2d(
-              getLeftPositionMeters() - lastLeftPositionMeters,
-              getRightPositionMeters() - lastRightPositionMeters);
+              getLeftPosition().minus(lastLeftPosition).in(Meters),
+              getRightPosition().minus(lastRightPosition).in(Meters));
       rawGyroRotation = rawGyroRotation.plus(new Rotation2d(twist.dtheta));
-      lastLeftPositionMeters = getLeftPositionMeters();
-      lastRightPositionMeters = getRightPositionMeters();
+      lastLeftPosition = getLeftPosition();
+      lastRightPosition = getRightPosition();
     }
 
     // Update odometry
-    poseEstimator.update(rawGyroRotation, getLeftPositionMeters(), getRightPositionMeters());
+    poseEstimator.update(rawGyroRotation, getLeftPosition().in(Meters), getRightPosition().in(Meters));
   }
 
   /** Runs the drive at the desired velocity. */
   public void runClosedLoop(ChassisSpeeds speeds) {
     var wheelSpeeds = kinematics.toWheelSpeeds(speeds);
-    runClosedLoop(wheelSpeeds.leftMetersPerSecond, wheelSpeeds.rightMetersPerSecond);
+    runClosedLoop(MetersPerSecond.of(wheelSpeeds.leftMetersPerSecond), MetersPerSecond.of(wheelSpeeds.rightMetersPerSecond));
   }
 
   /** Runs the drive at the desired left and right velocities. */
-  public void runClosedLoop(double leftMetersPerSec, double rightMetersPerSec) {
-    double leftRadPerSec = leftMetersPerSec / wheelRadiusMeters;
-    double rightRadPerSec = rightMetersPerSec / wheelRadiusMeters;
-    Logger.recordOutput("Drive/LeftSetpointRadPerSec", leftRadPerSec);
-    Logger.recordOutput("Drive/RightSetpointRadPerSec", rightRadPerSec);
+  public void runClosedLoop(LinearVelocity leftVelocity, LinearVelocity rightVelocity) {
+    AngularVelocity leftAngularVelocity = RadiansPerSecond.of(leftVelocity.in(MetersPerSecond) / wheelRadius.in(Meters));
+    AngularVelocity rightAngularVelocity = RadiansPerSecond.of(rightVelocity.in(MetersPerSecond) / wheelRadius.in(Meters));
+    Logger.recordOutput("Drive/LeftSetpointRadPerSec", leftAngularVelocity);
+    Logger.recordOutput("Drive/RightSetpointRadPerSec", rightAngularVelocity);
 
-    double leftFFVolts = kS * Math.signum(leftRadPerSec) + kV * leftRadPerSec;
-    double rightFFVolts = kS * Math.signum(rightRadPerSec) + kV * rightRadPerSec;
-    io.setVelocity(leftRadPerSec, rightRadPerSec, leftFFVolts, rightFFVolts);
+    Voltage leftFFVoltage = Volts.of(kS * Math.signum(leftAngularVelocity.in(RadiansPerSecond)) + kV * leftAngularVelocity.in(RadiansPerSecond));
+    Voltage rightFFVoltage = Volts.of(kS * Math.signum(rightAngularVelocity.in(RadiansPerSecond)) + kV * rightAngularVelocity.in(RadiansPerSecond));
+    io.setVelocity(leftAngularVelocity, rightAngularVelocity, leftFFVoltage, rightFFVoltage);
   }
 
   /** Runs the drive in open loop. */
-  public void runOpenLoop(double leftVolts, double rightVolts) {
-    io.setVoltage(leftVolts, rightVolts);
+  public void runOpenLoop(Voltage leftVoltage, Voltage rightVoltage) {
+    io.setVoltage(leftVoltage, rightVoltage);
   }
 
   /** Stops the drive. */
   public void stop() {
-    runOpenLoop(0.0, 0.0);
+    runOpenLoop(Volts.of(0.0), Volts.of(0.0));
   }
 
   /** Returns a command to run a quasistatic test in the specified direction. */
@@ -173,7 +180,7 @@ public class Drive extends SubsystemBase {
   /** Resets the current odometry pose. */
   public void setPose(Pose2d pose) {
     poseEstimator.resetPosition(
-        rawGyroRotation, getLeftPositionMeters(), getRightPositionMeters(), pose);
+        rawGyroRotation, getLeftPosition().in(Meters), getRightPosition().in(Meters), pose);
   }
 
   /**
@@ -188,31 +195,31 @@ public class Drive extends SubsystemBase {
 
   /** Returns the position of the left wheels in meters. */
   @AutoLogOutput
-  public double getLeftPositionMeters() {
-    return inputs.leftPositionRad * wheelRadiusMeters;
+  public Distance getLeftPosition() {
+    return Meters.of(inputs.leftPosition.in(Radians) * wheelRadius.in(Meters));
   }
 
   /** Returns the position of the right wheels in meters. */
   @AutoLogOutput
-  public double getRightPositionMeters() {
-    return inputs.rightPositionRad * wheelRadiusMeters;
+  public Distance getRightPosition() {
+    return Meters.of(inputs.rightPosition.in(Radians) * wheelRadius.in(Meters));
   }
 
   /** Returns the velocity of the left wheels in meters/second. */
   @AutoLogOutput
-  public double getLeftVelocityMetersPerSec() {
-    return inputs.leftVelocityRadPerSec * wheelRadiusMeters;
+  public AngularVelocity getLeftVelocity() {
+    return inputs.leftAngularVelocity.times(wheelRadius.in(Meters));
   }
 
   /** Returns the velocity of the right wheels in meters/second. */
   @AutoLogOutput
-  public double getRightVelocityMetersPerSec() {
-    return inputs.rightVelocityRadPerSec * wheelRadiusMeters;
+  public AngularVelocity getRightVelocity() {
+    return inputs.rightAngularVelocity.times(wheelRadius.in(Meters));
   }
 
   /** Returns the average velocity in radians/second. */
-  public double getCharacterizationVelocity() {
-    return (inputs.leftVelocityRadPerSec + inputs.rightVelocityRadPerSec) / 2.0;
+  public AngularVelocity getCharacterizationVelocity() {
+    return (inputs.leftAngularVelocity.plus(inputs.rightAngularVelocity)).div(2.0);
   }
 
   

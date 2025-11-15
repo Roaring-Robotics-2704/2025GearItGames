@@ -13,9 +13,14 @@
 
 package frc.robot.commands;
 
-import static frc.robot.subsystems.drive.DriveConstants.maxSpeedMetersPerSec;
+import static edu.wpi.first.units.Units.MetersPerSecond;
+import static edu.wpi.first.units.Units.RadiansPerSecond;
+import static edu.wpi.first.units.Units.Volts;
+import static frc.robot.subsystems.drive.DriveConstants.maxSpeed;
+//import static frc.robot.subsystems.drive.DriveConstants.maxSpeedMetersPerSec;
 
 import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.units.measure.Voltage;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.drive.DifferentialDrive;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -54,7 +59,7 @@ public class DriveCommands {
 
           // Apply output
           drive.runClosedLoop(
-              speeds.left * maxSpeedMetersPerSec, speeds.right * maxSpeedMetersPerSec);
+              maxSpeed.times(speeds.left), maxSpeed.times(speeds.right));
         },
         drive);
   }
@@ -77,10 +82,10 @@ public class DriveCommands {
         // Accelerate and gather data
         Commands.run(
                 () -> {
-                  double voltage = timer.get() * FF_RAMP_RATE;
+                  Voltage voltage = Volts.of(timer.get() * FF_RAMP_RATE);
                   drive.runOpenLoop(voltage, voltage);
-                  velocitySamples.add(drive.getCharacterizationVelocity());
-                  voltageSamples.add(voltage);
+                  velocitySamples.add(drive.getCharacterizationVelocity().in(RadiansPerSecond));
+                  voltageSamples.add(voltage.in(Volts));
                 },
                 drive)
 

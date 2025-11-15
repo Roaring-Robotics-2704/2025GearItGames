@@ -4,14 +4,18 @@
 
 package frc.robot.subsystems.arm;
 
+import static edu.wpi.first.units.Units.Degrees;
+
 import edu.wpi.first.math.system.plant.DCMotor;
-//import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
+import edu.wpi.first.units.measure.Angle;
 
 /** Add your docs here. */
 public class ArmConstants { 
     public static final int ARM_MOTOR_CAN_ID = 5;
     public static final int ARM_ENCODER_PORT = 0;
+
+    public static final Angle tolerance = Degrees.of(2.0);
 
     //PID Constants
     static class PID {

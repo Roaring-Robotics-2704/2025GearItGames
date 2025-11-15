@@ -13,6 +13,10 @@
 
 package frc.robot.subsystems.drive;
 
+import static edu.wpi.first.units.Units.Amps;
+import static edu.wpi.first.units.Units.Rotations;
+import static edu.wpi.first.units.Units.RotationsPerSecond;
+import static edu.wpi.first.units.Units.Volts;
 import static frc.robot.subsystems.drive.DriveConstants.*;
 import static frc.robot.util.PhoenixUtil.*;
 
@@ -22,6 +26,9 @@ import com.ctre.phoenix.motorcontrol.TalonSRXControlMode;
 import com.ctre.phoenix.motorcontrol.can.TalonSRX;
 import com.ctre.phoenix.motorcontrol.can.TalonSRXConfiguration;
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.units.measure.Voltage;
+import edu.wpi.first.units.measure.AngularVelocity;
+import edu.wpi.first.units.measure.Current;
 
 /** This drive implementation is for Talon SRXs driving brushed motors (e.g. CIMS) with encoders. */
 public class DriveIOTalonSRX implements DriveIO {
@@ -32,8 +39,8 @@ public class DriveIOTalonSRX implements DriveIO {
 
   public DriveIOTalonSRX() {
     var config = new TalonSRXConfiguration();
-    config.peakCurrentLimit = currentLimit;
-    config.continuousCurrentLimit = currentLimit - 15;
+    config.peakCurrentLimit = (int)currentLimit.in(Amps);
+    config.continuousCurrentLimit = (int)currentLimit.in(Amps) - 15;
     config.peakCurrentDuration = 250;
     config.voltageCompSaturation = 12.0;
     config.primaryPID.selectedFeedbackSensor = FeedbackDevice.QuadEncoder;
@@ -47,47 +54,46 @@ public class DriveIOTalonSRX implements DriveIO {
 
   @Override
   public void updateInputs(DriveIOInputs inputs) {
-    inputs.leftPositionRad =
-        Units.rotationsToRadians(leftLeader.getSelectedSensorPosition() / tickPerRevolution);
-    inputs.leftVelocityRadPerSec =
-        Units.rotationsToRadians(
+    inputs.leftPosition.mut_replace(Rotations.of(leftLeader.getSelectedSensorPosition() / tickPerRevolution));
+    inputs.leftAngularVelocity.mut_replace(
+          RotationsPerSecond.of(
             leftLeader.getSelectedSensorVelocity()
                 / tickPerRevolution
-                * 10.0); // Raw units are ticks per 100ms :(
-    inputs.leftAppliedVolts = leftLeader.getMotorOutputVoltage();
-    inputs.leftCurrentAmps = leftLeader.getStatorCurrent();
+                * 10.0)); // Raw units are ticks per 100ms :(
+    inputs.leftAppliedVoltage.mut_replace(Volts.of(leftLeader.getMotorOutputVoltage()));
+    inputs.leftCurrent.mut_replace(Amps.of(leftLeader.getStatorCurrent()));
 
-    inputs.rightPositionRad =
-        Units.rotationsToRadians(rightLeader.getSelectedSensorPosition() / tickPerRevolution);
-    inputs.rightVelocityRadPerSec =
-        Units.rotationsToRadians(
+    inputs.rightPosition.mut_replace(
+        Rotations.of(rightLeader.getSelectedSensorPosition() / tickPerRevolution));
+    inputs.rightAngularVelocity.mut_replace(
+        RotationsPerSecond.of(
             rightLeader.getSelectedSensorVelocity()
                 / tickPerRevolution
-                * 10.0); // Raw units are ticks per 100ms :(
-    inputs.rightAppliedVolts = rightLeader.getMotorOutputVoltage();
-    inputs.rightCurrentAmps = rightLeader.getStatorCurrent();
+                * 10.0)); // Raw units are ticks per 100ms :(
+    inputs.rightAppliedVoltage.mut_replace(Volts.of(rightLeader.getMotorOutputVoltage()));
+    inputs.rightCurrent.mut_replace(Amps.of(rightLeader.getStatorCurrent()));
   }
 
   @Override
-  public void setVoltage(double leftVolts, double rightVolts) {
+  public void setVoltage(Voltage leftVoltage, Voltage rightVoltage) {
     // OK to just divide by 12 because voltage compensation is enabled
-    leftLeader.set(TalonSRXControlMode.PercentOutput, leftVolts / 12.0);
-    rightLeader.set(TalonSRXControlMode.PercentOutput, rightVolts / 12.0);
+    leftLeader.set(TalonSRXControlMode.PercentOutput, leftVoltage.in(Volts) / 12.0);
+    rightLeader.set(TalonSRXControlMode.PercentOutput, rightVoltage.in(Volts) / 12.0);
   }
 
   @Override
   public void setVelocity(
-      double leftRadPerSec, double rightRadPerSec, double leftFFVolts, double rightFFVolts) {
+      AngularVelocity leftAngularVelocity, AngularVelocity rightAngularVelocity, Voltage leftFFVoltage, Voltage rightFFVoltage) {
     // OK to just divide FF by 12 because voltage compensation is enabled
     leftLeader.set(
         TalonSRXControlMode.Velocity,
-        Units.radiansToRotations(leftRadPerSec) / 10.0, // Raw units are ticks per 100ms :(
+        leftAngularVelocity.in(RotationsPerSecond) / 10.0, // Raw units are ticks per 100ms :(
         DemandType.ArbitraryFeedForward,
-        leftFFVolts / 12.0);
+        leftFFVoltage.in(Volts) / 12.0);
     rightLeader.set(
         TalonSRXControlMode.Velocity,
-        Units.radiansToRotations(rightRadPerSec) / 10.0, // Raw units are ticks per 100ms :(
+      rightAngularVelocity.in(RotationsPerSecond) / 10.0, // Raw units are ticks per 100ms :(
         DemandType.ArbitraryFeedForward,
-        rightFFVolts / 12.0);
+        rightFFVoltage.in(Volts) / 12.0);
   }
 }

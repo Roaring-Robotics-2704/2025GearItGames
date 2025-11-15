@@ -13,14 +13,29 @@
 
 package frc.robot.subsystems.drive;
 
+import static edu.wpi.first.units.Units.Amps;
+import static edu.wpi.first.units.Units.Kilograms;
+import static edu.wpi.first.units.Units.Meter;
+import static edu.wpi.first.units.Units.Meters;
+import static edu.wpi.first.units.Units.MetersPerSecond;
+import static edu.wpi.first.units.Units.Second;
+import static edu.wpi.first.units.Units.Inches;
+
 import com.pathplanner.lib.config.ModuleConfig;
 import com.pathplanner.lib.config.RobotConfig;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.units.MomentOfInertiaUnit;
+import edu.wpi.first.units.measure.Current;
+import edu.wpi.first.units.measure.Distance;
+import edu.wpi.first.units.measure.LinearVelocity;
+import edu.wpi.first.units.measure.Mass;
+import edu.wpi.first.units.measure.MomentOfInertia;
+import edu.wpi.first.units.measure.Velocity;
 
 public class DriveConstants {
-  public static final double maxSpeedMetersPerSec = 4.0;
-  public static final double trackWidth = Units.inchesToMeters(20);
+  public static final LinearVelocity maxSpeed = MetersPerSecond.of(4.0);
+  public static final Distance trackWidth = Inches.of(20);
 
   // Device CAN IDs
   public static final int pigeonCanId = 9;
@@ -28,8 +43,8 @@ public class DriveConstants {
   public static final int rightLeaderCanId = 3;
 
   // Motor configuration
-  public static final int currentLimit = 60;
-  public static final double wheelRadiusMeters = Units.inchesToMeters(3.0);
+  public static final Current currentLimit = Amps.of(60);
+  public static final Distance wheelRadius = Inches.of(3.0);
   public static final double motorReduction = 10.71;
   public static final boolean leftInverted = false;
   public static final boolean rightInverted = true;
@@ -43,19 +58,19 @@ public class DriveConstants {
 
 
   // PathPlanner configuration
-  public static final double robotMassKg = 74.088;
+  public static final Mass robotMass = Kilograms.of(74.088);
   public static final double robotMOI = 6.883;
   public static final double wheelCOF = 1.2;
   public static final RobotConfig ppConfig =
       new RobotConfig(
-          robotMassKg,
+          robotMass.in(Kilograms),
           robotMOI,
           new ModuleConfig(
-              wheelRadiusMeters,
-              maxSpeedMetersPerSec,
+              wheelRadius.in(Meters),
+              maxSpeed.in(MetersPerSecond),
               wheelCOF,
               gearbox.withReduction(motorReduction),
-              currentLimit,
+              currentLimit.in(Amps),
               1),
-          trackWidth);
+          trackWidth.in(Meters));
 }

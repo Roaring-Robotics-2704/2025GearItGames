@@ -13,18 +13,21 @@ import org.littletonrobotics.junction.AutoLog;
 
 //import edu.wpi.first.units.measure.Acceleration;
 import edu.wpi.first.units.measure.Angle;
-import edu.wpi.first.units.measure.AngularVelocity;
-import edu.wpi.first.units.measure.Current;
+
+import edu.wpi.first.units.measure.MutAngle;
+import edu.wpi.first.units.measure.MutAngularVelocity;
+import edu.wpi.first.units.measure.MutCurrent;
+import edu.wpi.first.units.measure.MutVoltage;
 //import edu.wpi.first.units.measure.Velocity;
 import edu.wpi.first.units.measure.Voltage;
 
 public interface ArmIO {
   @AutoLog
   public static class ArmIOInputs {
-    public Angle Position = Degrees.zero();
-    public AngularVelocity Velocity = DegreesPerSecond.zero();
-    public Voltage Voltage = Volts.zero();
-    public Current Current = Amps.zero();
+    public final MutAngle Position = Degrees.zero().mutableCopy();
+    public final MutAngularVelocity Velocity = DegreesPerSecond.zero().mutableCopy();
+    public final MutVoltage Voltage = Volts.zero().mutableCopy();
+    public final MutCurrent Current = Amps.zero().mutableCopy();
 
 
   }

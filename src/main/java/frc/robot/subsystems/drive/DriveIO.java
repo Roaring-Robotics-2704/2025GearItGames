@@ -13,29 +13,40 @@
 
 package frc.robot.subsystems.drive;
 
+import static edu.wpi.first.units.Units.Amps;
+import static edu.wpi.first.units.Units.Degrees;
+import static edu.wpi.first.units.Units.DegreesPerSecond;
+import static edu.wpi.first.units.Units.Volts;
+
 import org.littletonrobotics.junction.AutoLog;
+
+import edu.wpi.first.units.measure.AngularVelocity;
+import edu.wpi.first.units.measure.MutAngle;
+import edu.wpi.first.units.measure.MutAngularVelocity;
+import edu.wpi.first.units.measure.MutCurrent;
+import edu.wpi.first.units.measure.MutVoltage;
+import edu.wpi.first.units.measure.Voltage;
 
 public interface DriveIO {
   @AutoLog
   public static class DriveIOInputs {
-    public double leftPositionRad = 0.0;
-    public double leftVelocityRadPerSec = 0.0;
-    public double leftAppliedVolts = 0.0;
-    public double leftCurrentAmps = 0.0;
+    public MutAngle leftPosition = Degrees.zero().mutableCopy();
+    public MutAngularVelocity leftAngularVelocity = DegreesPerSecond.zero().mutableCopy();
+    public MutVoltage leftAppliedVoltage = Volts.zero().mutableCopy();
+    public MutCurrent leftCurrent = Amps.zero().mutableCopy();
 
-    public double rightPositionRad = 0.0;
-    public double rightVelocityRadPerSec = 0.0;
-    public double rightAppliedVolts = 0.0;
-    public double rightCurrentAmps = 0.0;
+    public MutAngle rightPosition = Degrees.zero().mutableCopy();
+    public MutAngularVelocity rightAngularVelocity = DegreesPerSecond.zero().mutableCopy();
+    public MutVoltage rightAppliedVoltage = Volts.zero().mutableCopy();
+    public MutCurrent rightCurrent = Amps.zero().mutableCopy();
   }
 
   /** Updates the set of loggable inputs. */
   public default void updateInputs(DriveIOInputs inputs) {}
 
   /** Run open loop at the specified voltage. */
-  public default void setVoltage(double leftVolts, double rightVolts) {}
+  public default void setVoltage(Voltage leftVoltage, Voltage rightVoltage) {}
 
   /** Run closed loop at the specified velocity. */
-  public default void setVelocity(
-      double leftRadPerSec, double rightRadPerSec, double leftFFVolts, double rightFFVolts) {}
+  public default void setVelocity(AngularVelocity leftAngularVelocity, AngularVelocity rightAngularVelocity, Voltage leftFFVoltage, Voltage rightFFVoltage) {}
 }

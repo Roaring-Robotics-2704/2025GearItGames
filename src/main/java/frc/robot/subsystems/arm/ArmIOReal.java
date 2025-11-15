@@ -10,6 +10,7 @@ import com.ctre.phoenix.motorcontrol.can.TalonSRXConfiguration;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.revrobotics.RelativeEncoder;
 
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularVelocity;
@@ -55,14 +56,14 @@ public class ArmIOReal implements ArmIO {
 
     @Override
     public void updateInputs(ArmIOInputs inputs) {
-        inputs.Position = Degrees.of(armEncoder.get());
+        inputs.Position.mut_replace(Rotations.of(armEncoder.get()));
 
         currentPosition = Rotations.of(armEncoder.get());
-        inputs.Velocity = RotationsPerSecond.of(armRelativeEncoder.getRate());
+        inputs.Velocity.mut_replace(RotationsPerSecond.of(armRelativeEncoder.getRate()));
         previousPosition = currentPosition;
 
-        inputs.Voltage = Volts.of(armMotor.getMotorOutputVoltage());
-        inputs.Current = Amps.of(armMotor.getStatorCurrent());
+        inputs.Voltage.mut_replace(Volts.of(armMotor.getMotorOutputVoltage()));
+        inputs.Current.mut_replace(Amps.of(armMotor.getStatorCurrent()));
     }
 
     @Override
@@ -80,8 +81,7 @@ public class ArmIOReal implements ArmIO {
 
     @Override
     public boolean atSetpoint() {
-        return true;
+        return MathUtil.isNear(targetPosition.in(Degrees), currentPosition.in(Degrees), ArmConstants.tolerance.in(Degrees));
     }
 
-    // TODO add atSetpoint method
 }
