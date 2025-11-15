@@ -130,7 +130,7 @@ public class RobotContainer {
 		controller.rightTrigger().whileTrue(
 				Commands.sequence(
 						superStructure.gotoState(SuperStructureState.OUTTAKING_HOLD),
-						superStructure.gotoState(SuperStructureState.OUTTAKING),
+						superStructure.gotoState (SuperStructureState.OUTTAKING),
 						superStructure.gotoState(SuperStructureState.DEFAULT_STATE)));
 
 	}
