@@ -12,6 +12,9 @@ public class SuperStructure extends SubsystemBase {
   private SuperStructureState desiredState = SuperStructureState.DEFAULT_STATE;
   private SuperStructureStatus currentStatus = SuperStructureStatus.IDLE;
 
+    /** Creates a new SuperStructure. */
+    public SuperStructure() {}
+
   public enum SuperStructureState {
     DEFAULT_STATE,
     INTAKE_UPRIGHT,
@@ -46,8 +49,7 @@ public class SuperStructure extends SubsystemBase {
         && (this.currentStatus == SuperStructureStatus.IDLE);
   }
 
-  /** Creates a new SuperStructure. */
-  public SuperStructure() {}
+
 
   @Override
   public void periodic() {
