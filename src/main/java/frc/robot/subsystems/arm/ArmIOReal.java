@@ -33,55 +33,55 @@ import static frc.robot.subsystems.arm.ArmConstants.ARM_CONSTRAINTS;
 import static frc.robot.subsystems.arm.ArmConstants.PID;
 import static frc.robot.subsystems.drive.DriveConstants.currentLimit;
 
-
 /** Add your docs here. */
 public class ArmIOReal implements ArmIO {
-    TalonSRX armMotor;
-    AnalogEncoder armEncoder;
-    Encoder armRelativeEncoder;
-    ProfiledPIDController armController;
-    Angle previousPosition = Degrees.zero();
-    Angle currentPosition = Degrees.zero();
-    Angle targetPosition = Degrees.zero();
+	TalonSRX armMotor;
+	AnalogEncoder armEncoder;
+	Encoder armRelativeEncoder;
+	ProfiledPIDController armController;
+	Angle previousPosition = Degrees.zero();
+	Angle currentPosition = Degrees.zero();
+	Angle targetPosition = Degrees.zero();
 
-    public ArmIOReal() {
-        armMotor = new TalonSRX(ARM_MOTOR_CAN_ID);
-        armEncoder = new AnalogEncoder(ARM_ENCODER_PORT);
-        armRelativeEncoder = new Encoder(ARM_ENCODER_PORT+1, ARM_ENCODER_PORT+2);
-        armController = new ProfiledPIDController(PID.ARM_P, PID.ARM_I, PID.ARM_D, ARM_CONSTRAINTS);
-        armMotor.configFactoryDefault();        
-        armMotor.enableVoltageCompensation(true);
-        
-    }
+	public ArmIOReal() {
+		armMotor = new TalonSRX(ARM_MOTOR_CAN_ID);
+		armEncoder = new AnalogEncoder(ARM_ENCODER_PORT);
+		armRelativeEncoder = new Encoder(ARM_ENCODER_PORT + 1, ARM_ENCODER_PORT + 2);
+		armController = new ProfiledPIDController(PID.ARM_P, PID.ARM_I, PID.ARM_D, ARM_CONSTRAINTS);
+		armMotor.configFactoryDefault();
+		armMotor.enableVoltageCompensation(true);
 
-    @Override
-    public void updateInputs(ArmIOInputs inputs) {
-        inputs.Position.mut_replace(Rotations.of(armEncoder.get()));
+	}
 
-        currentPosition = Rotations.of(armEncoder.get());
-        inputs.Velocity.mut_replace(RotationsPerSecond.of(armRelativeEncoder.getRate()));
-        previousPosition = currentPosition;
+	@Override
+	public void updateInputs(ArmIOInputs inputs) {
+		inputs.Position.mut_replace(Rotations.of(armEncoder.get()));
 
-        inputs.Voltage.mut_replace(Volts.of(armMotor.getMotorOutputVoltage()));
-        inputs.Current.mut_replace(Amps.of(armMotor.getStatorCurrent()));
-    }
+		currentPosition = Rotations.of(armEncoder.get());
+		inputs.Velocity.mut_replace(RotationsPerSecond.of(armRelativeEncoder.getRate()));
+		previousPosition = currentPosition;
 
-    @Override
-    public void setVoltage(Voltage voltage) {
-        armMotor.set(ControlMode.PercentOutput, voltage.in(Volts) / 12.0);
-    }
+		inputs.Voltage.mut_replace(Volts.of(armMotor.getMotorOutputVoltage()));
+		inputs.Current.mut_replace(Amps.of(armMotor.getStatorCurrent()));
+	}
 
-    @Override
-    public void setAngle(Angle angle) {
-        targetPosition = angle;
-        armController.setGoal(targetPosition.in(Degrees));
-        double output = armController.calculate(armEncoder.get());
-        armMotor.set(ControlMode.PercentOutput, output);
-    }
+	@Override
+	public void setVoltage(Voltage voltage) {
+		armMotor.set(ControlMode.PercentOutput, voltage.in(Volts) / 12.0);
+	}
 
-    @Override
-    public boolean atSetpoint() {
-        return MathUtil.isNear(targetPosition.in(Degrees), currentPosition.in(Degrees), ArmConstants.tolerance.in(Degrees));
-    }
+	@Override
+	public void setAngle(Angle angle) {
+		targetPosition = angle;
+		armController.setGoal(targetPosition.in(Degrees));
+		double output = armController.calculate(armEncoder.get());
+		armMotor.set(ControlMode.PercentOutput, output);
+	}
+
+	@Override
+	public boolean atSetpoint() {
+		return MathUtil.isNear(targetPosition.in(Degrees), currentPosition.in(Degrees),
+				ArmConstants.tolerance.in(Degrees));
+	}
 
 }

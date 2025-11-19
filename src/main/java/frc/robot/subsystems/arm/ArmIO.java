@@ -10,6 +10,7 @@ import static edu.wpi.first.units.Units.DegreesPerSecond;
 import static edu.wpi.first.units.Units.Volts;
 
 import org.littletonrobotics.junction.AutoLog;
+import org.littletonrobotics.junction.AutoLogOutput;
 
 //import edu.wpi.first.units.measure.Acceleration;
 import edu.wpi.first.units.measure.Angle;
@@ -22,25 +23,28 @@ import edu.wpi.first.units.measure.MutVoltage;
 import edu.wpi.first.units.measure.Voltage;
 
 public interface ArmIO {
-  @AutoLog
-  public static class ArmIOInputs {
-    public final MutAngle Position = Degrees.zero().mutableCopy();
-    public final MutAngularVelocity Velocity = DegreesPerSecond.zero().mutableCopy();
-    public final MutVoltage Voltage = Volts.zero().mutableCopy();
-    public final MutCurrent Current = Amps.zero().mutableCopy();
+	@AutoLog
+	public static class ArmIOInputs {
+		public MutAngle Position = Degrees.zero().mutableCopy();
+		public MutAngularVelocity Velocity = DegreesPerSecond.zero().mutableCopy();
+		public MutVoltage Voltage = Volts.zero().mutableCopy();
+		public MutCurrent Current = Amps.zero().mutableCopy();
 
+	}
 
-  }
+	/** Updates the set of loggable inputs. */
+	public default void updateInputs(ArmIOInputs inputs) {
+	}
 
-  /** Updates the set of loggable inputs. */
-  public default void updateInputs(ArmIOInputs inputs) {}
+	/** Run open loop at the specified voltage. */
+	public default void setVoltage(Voltage voltage) {
+	}
 
-  /** Run open loop at the specified voltage. */
-  public default void setVoltage(Voltage voltage) {}
-
-  public default void setAngle(Angle angle) {}
-
-  public default boolean atSetpoint() {
-    return true;
-  }
+	public default void setAngle(Angle angle) {
+	}
+	
+	@AutoLogOutput
+	public default boolean atSetpoint() {
+		return true;
+	}
 }

@@ -34,43 +34,41 @@ import edu.wpi.first.units.measure.MomentOfInertia;
 import edu.wpi.first.units.measure.Velocity;
 
 public class DriveConstants {
-  public static final LinearVelocity maxSpeed = MetersPerSecond.of(4.0);
-  public static final Distance trackWidth = Inches.of(20);
+	public static final LinearVelocity maxSpeed = MetersPerSecond.of(4.0);
+	public static final Distance trackWidth = Inches.of(20);
 
-  // Device CAN IDs
-  public static final int pigeonCanId = 9;
-  public static final int leftLeaderCanId = 1;
-  public static final int rightLeaderCanId = 3;
+	// Device CAN IDs
+	public static final int pigeonCanId = 9;
+	public static final int leftLeaderCanId = 1;
+	public static final int rightLeaderCanId = 2;
 
-  // Motor configuration
-  public static final Current currentLimit = Amps.of(60);
-  public static final Distance wheelRadius = Inches.of(3.0);
-  public static final double motorReduction = 10.71;
-  public static final boolean leftInverted = false;
-  public static final boolean rightInverted = true;
-  public static final DCMotor gearbox = DCMotor.getCIM(1);
+	// Motor configuration
+	public static final Current currentLimit = Amps.of(60);
+	public static final Distance wheelRadius = Inches.of(3.0);
+	public static final double motorReduction = 10.71;
+	public static final boolean leftInverted = false;
+	public static final boolean rightInverted = true;
+	public static final DCMotor gearbox = DCMotor.getCIM(1);
 
-  // Velocity PID configuration
-  public static final double REAL_P = 0.0;
-  public static final double REAL_D = 0.0;
-  public static final double REAL_S = 0.0;
-  public static final double REAL_V = 0.1;
+	// Velocity PID configuration
+	public static final double REAL_P = 0.0;
+	public static final double REAL_D = 0.0;
+	public static final double REAL_S = 0.0;
+	public static final double REAL_V = 0.1;
 
-
-  // PathPlanner configuration
-  public static final Mass robotMass = Kilograms.of(74.088);
-  public static final double robotMOI = 6.883;
-  public static final double wheelCOF = 1.2;
-  public static final RobotConfig ppConfig =
-      new RobotConfig(
-          robotMass.in(Kilograms),
-          robotMOI,
-          new ModuleConfig(
-              wheelRadius.in(Meters),
-              maxSpeed.in(MetersPerSecond),
-              wheelCOF,
-              gearbox.withReduction(motorReduction),
-              currentLimit.in(Amps),
-              1),
-          trackWidth.in(Meters));
+	// PathPlanner configuration
+	public static final Mass robotMass = Kilograms.of(74.088);
+	public static final double robotMOI = 6.883;
+	public static final double wheelCOF = 1.2;
+	public static final RobotConfig ppConfig = new RobotConfig(
+			robotMass.in(Kilograms),
+			robotMOI,
+			new ModuleConfig(
+					wheelRadius.in(Meters),
+					maxSpeed.in(MetersPerSecond),
+					wheelCOF,
+					gearbox.withReduction(motorReduction),
+					currentLimit.in(Amps),
+					1),
+			trackWidth.in(Meters));
 }

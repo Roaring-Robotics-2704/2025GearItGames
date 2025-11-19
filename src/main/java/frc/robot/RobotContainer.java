@@ -33,21 +33,24 @@ import frc.robot.subsystems.drive.DriveIOSim;
 import frc.robot.subsystems.drive.DriveIOTalonSRX;
 import frc.robot.subsystems.drive.GyroIO;
 import frc.robot.subsystems.drive.GyroIOPigeon2;
+import frc.robot.subsystems.gripper.Gripper;
+import frc.robot.subsystems.gripper.GripperIO;
+import frc.robot.subsystems.gripper.GripperIOReal;
+import frc.robot.subsystems.gripper.GripperIOSim;
+
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
 /**
- * This class is where the bulk of the robot should be declared. Since
- * Command-based is a
- * "declarative" paradigm, very little robot logic should actually be handled in
- * the {@link Robot}
- * periodic methods (other than the scheduler calls). Instead, the structure of
- * the robot (including
+ * This class is where the bulk of the robot should be declared. Since Command-based is a
+ * "declarative" paradigm, very little robot logic should actually be handled in the {@link Robot}
+ * periodic methods (other than the scheduler calls). Instead, the structure of the robot (including
  * subsystems, commands, and button mappings) should be declared here.
  */
 public class RobotContainer {
 	// Subsystems
 	private final Drive drive;
 	private final Arm arm;
+	private final Gripper gripper;
 	private final SuperStructure superStructure;
 
 	// Controller
@@ -64,7 +67,8 @@ public class RobotContainer {
 			case REAL:
 				// Real robot, instantiate hardware IO implementations
 				drive = new Drive(new DriveIOTalonSRX(), new GyroIOPigeon2());
-				arm = new Arm(new ArmIOReal());
+				arm = new Arm(new ArmIO() {});
+				gripper = new Gripper(new GripperIOReal());
 				break;
 
 			case SIM:
@@ -72,6 +76,7 @@ public class RobotContainer {
 				drive = new Drive(new DriveIOSim(), new GyroIO() {
 				});
 				arm = new Arm(new ArmIOSim());
+				gripper = new Gripper(new GripperIOSim());
 				break;
 
 			default:
@@ -81,9 +86,11 @@ public class RobotContainer {
 				});
 				arm = new Arm(new ArmIO() {
 				});
+				gripper = new Gripper(new GripperIO() {
+				});
 				break;
 		}
-		superStructure = new SuperStructure(arm);
+		superStructure = new SuperStructure(arm, gripper);
 
 		// Set up auto routines
 		autoChooser = new LoggedDashboardChooser<>("Auto Choices", AutoBuilder.buildAutoChooser());
@@ -107,31 +114,29 @@ public class RobotContainer {
 	}
 
 	/**
-	 * Use this method to define your button->command mappings. Buttons can be
-	 * created by
-	 * instantiating a {@link GenericHID} or one of its subclasses ({@link
-	 * edu.wpi.first.wpilibj.Joystick} or {@link XboxController}), and then passing
-	 * it to a {@link
-	 * edu.wpi.first.wpilibj2.command.button.JoystickButton}.
+	 * Use this method to define your button->command mappings. Buttons can be created by
+	 * instantiating a {@link GenericHID} or one of its subclasses ({@link edu.wpi.first.wpilibj.Joystick}
+	 * or {@link XboxController}), and then passing it to a
+	 * {@link edu.wpi.first.wpilibj2.command.button.JoystickButton}.
 	 */
 	private void configureButtonBindings() {
 		// Default command, normal arcade drive
 		drive.setDefaultCommand(
 				DriveCommands.arcadeDrive(
-						drive, controller::getLeftY, controller::getRightX));
+						drive, controller::getLeftY, controller::getRightX).withName("Arcade Drive"));
 		controller.leftTrigger().whileTrue(
 				superStructure.gotoState(
-						SuperStructureState.INTAKE_UPRIGHT))
+						SuperStructureState.INTAKE_UPRIGHT).withName("Driver Intake Upright"))
 				.onFalse(
 						Commands.sequence(
 								superStructure.gotoState(
-										SuperStructureState.INTAKE_UPRIGHT_GRAB),
-								superStructure.gotoState(SuperStructureState.HOLDING)));
+										SuperStructureState.INTAKE_UPRIGHT_GRAB).withName("Driver Intake Upright Grab"),
+								superStructure.gotoState(SuperStructureState.HOLDING).withName("Driver Holding")));
 		controller.rightTrigger().whileTrue(
 				Commands.sequence(
-						superStructure.gotoState(SuperStructureState.OUTTAKING_HOLD),
-						superStructure.gotoState (SuperStructureState.OUTTAKING),
-						superStructure.gotoState(SuperStructureState.DEFAULT_STATE)));
+						superStructure.gotoState(SuperStructureState.OUTTAKING_HOLD).withName("Driver Outtaking Hold"),
+						superStructure.gotoState(SuperStructureState.OUTTAKING).withName("Driver Outtaking"),
+						superStructure.gotoState(SuperStructureState.DEFAULT_STATE).withName("Driver Default State")));
 
 	}
 

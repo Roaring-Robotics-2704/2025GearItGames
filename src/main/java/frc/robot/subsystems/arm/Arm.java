@@ -4,13 +4,16 @@
 
 package frc.robot.subsystems.arm;
 
+import org.littletonrobotics.junction.Logger;
+
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 public class Arm extends SubsystemBase {
 	/** Creates a new Arm. */
-	private ArmIOInputsAutoLogged inputs = new ArmIOInputsAutoLogged();
 	ArmIO armIO;
+	private ArmIOInputsAutoLogged inputs = new ArmIOInputsAutoLogged();
+
 
 	public Arm(ArmIO armIO) {
 		this.armIO = armIO;
@@ -19,6 +22,7 @@ public class Arm extends SubsystemBase {
 	@Override
 	public void periodic() {
 		armIO.updateInputs(inputs);
+		Logger.processInputs("Arm", inputs); // Send input data to the logging framework (or update from the log during replay)
 		// This method will be called once per scheduler run
 	}
 
