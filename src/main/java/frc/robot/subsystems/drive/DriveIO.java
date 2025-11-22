@@ -30,13 +30,11 @@ import edu.wpi.first.units.measure.Voltage;
 public interface DriveIO {
 	@AutoLog
 	public static class DriveIOInputs {
-		public MutAngle leftPosition = Degrees.zero().mutableCopy();
-		public MutAngularVelocity leftAngularVelocity = DegreesPerSecond.zero().mutableCopy();
+	
 		public MutVoltage leftAppliedVoltage = Volts.zero().mutableCopy();
 		public MutCurrent leftCurrent = Amps.zero().mutableCopy();
 
-		public MutAngle rightPosition = Degrees.zero().mutableCopy();
-		public MutAngularVelocity rightAngularVelocity = DegreesPerSecond.zero().mutableCopy();
+	
 		public MutVoltage rightAppliedVoltage = Volts.zero().mutableCopy();
 		public MutCurrent rightCurrent = Amps.zero().mutableCopy();
 	}

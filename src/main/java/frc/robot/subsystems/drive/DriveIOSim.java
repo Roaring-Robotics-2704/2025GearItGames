@@ -57,13 +57,10 @@ public class DriveIOSim implements DriveIO {
         MathUtil.clamp(rightAppliedVoltage.in(Volts), -12.0, 12.0));
     sim.update(0.02);
 
-    inputs.leftPosition.mut_replace(Radians.of(sim.getLeftPositionMeters() / wheelRadius.in(Meters)));
-    inputs.leftAngularVelocity.mut_replace(RadiansPerSecond.of(sim.getLeftVelocityMetersPerSecond() / wheelRadius.in(Meters)));
+
     inputs.leftAppliedVoltage.mut_replace(leftAppliedVoltage);
     inputs.leftCurrent.mut_replace(Amps.of(sim.getLeftCurrentDrawAmps()));
 
-    inputs.rightPosition.mut_replace(Radians.of(sim.getRightPositionMeters() / wheelRadius.in(Meters)));
-    inputs.rightAngularVelocity.mut_replace(RadiansPerSecond.of(sim.getRightVelocityMetersPerSecond() / wheelRadius.in(Meters)));
     inputs.rightAppliedVoltage.mut_replace(rightAppliedVoltage);
     inputs.rightCurrent.mut_replace(Amps.of(sim.getRightCurrentDrawAmps()));
   }

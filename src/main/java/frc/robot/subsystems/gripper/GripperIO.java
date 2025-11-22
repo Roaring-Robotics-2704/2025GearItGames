@@ -20,6 +20,7 @@ public interface GripperIO {
   public class GripperIOInputs {
     public MutVoltage voltage = Volts.zero().mutableCopy();
     public MutCurrent current = Amps.zero().mutableCopy();
+    public boolean atSetpoint = true;
 
   }
 
@@ -28,8 +29,5 @@ public interface GripperIO {
 
   /** Run open loop at the specified voltage. */
   public default void setVoltage(Voltage voltage) {}
-  @AutoLogOutput
-  public default boolean atSetpoint() {
-    return true;
-  }
+
 }

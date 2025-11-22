@@ -61,22 +61,15 @@ public class SuperStructure extends SubsystemBase {
 		Logger.recordOutput("SuperStructure/Current State", currentState);
 		Logger.recordOutput("SuperStructure/Desired State", desiredState);
 		Logger.recordOutput("SuperStructure/Current Status", currentStatus);
-		if (currentStatus == SuperStructureStatus.TRANSITIONING) {
-			if (!arm.atSetpoint()) {
-				arm.setArmAngle(desiredState.getArmAngle());
-			}
-			if (!gripper.atSetpoint()) {
-				gripper.setGripperClosed(desiredState.getGripperClosed());
-			}
+		
 
 			if (arm.atSetpoint() && gripper.atSetpoint()) {
 				currentState = desiredState;
 				currentStatus = SuperStructureStatus.IDLE;
 			}
-		} else {
 			// Maintain current state
-			arm.setArmAngle(currentState.getArmAngle());
-			gripper.setGripperClosed(currentState.getGripperClosed());
-		}
+			arm.setArmAngle(desiredState.getArmAngle());
+			gripper.setGripperClosed(desiredState.getGripperClosed());
+		
 	}
 }

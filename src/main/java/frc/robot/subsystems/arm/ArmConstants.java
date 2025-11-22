@@ -13,19 +13,22 @@ import edu.wpi.first.units.measure.Angle;
 /** Add your docs here. */
 public class ArmConstants {
 	public static final int ARM_MOTOR_CAN_ID = 3;
-	public static final int ARM_ENCODER_PORT = 0;
 
 	public static final Angle tolerance = Degrees.of(2.0);
 
 	// PID Constants
 	static class PID {
-		public static final double ARM_P = 0.0;
+		public static final double ARM_P = 0;
 		public static final double ARM_I = 0.0;
 		public static final double ARM_D = 0.0;
+		public static final double ARM_KG = 0.5;
+		public static final double ARM_KS = 2;
+		public static final double ARM_KV = 2.74;
+		
 	}
 
 	// Motion Profile Constraints
-	public static final TrapezoidProfile.Constraints ARM_CONSTRAINTS = new TrapezoidProfile.Constraints(90.0, 180.0); // degrees per second, degrees per second^2
+	public static final TrapezoidProfile.Constraints ARM_CONSTRAINTS = new TrapezoidProfile.Constraints(1/8, 1/16); // rotations per second, rotations per second^2
 
 	// Sim Constants
 	public static final DCMotor armMotor = DCMotor.getCIM(1).withReduction(9).withReduction((double) 36 / 16); // Example motor, replace with actual motor
@@ -33,5 +36,5 @@ public class ArmConstants {
 	public static final double kArmMass = 5.0; // kg
 	public static final double kMinAngleRads = -Math.toRadians(-5); // Minimum angle in radians
 	public static final double kMaxAngleRads = Math.toRadians(135); // Maximum angle in radians
-	public static final double kArmEncoderDistPerPulse = 360.0 / 1024.0; // degrees per pulse, example value
+	public static final double kArmEncoderDistPerPulse = 0.0000813802083; // rotations per pulse
 }

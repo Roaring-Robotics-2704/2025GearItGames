@@ -44,8 +44,6 @@ import java.util.function.DoubleSupplier;
 public class DriveIOSpark implements DriveIO {
 	private final SparkMax leftLeader = new SparkMax(leftLeaderCanId, MotorType.kBrushless);
 	private final SparkMax rightLeader = new SparkMax(rightLeaderCanId, MotorType.kBrushless);
-	private final RelativeEncoder leftEncoder = leftLeader.getEncoder();
-	private final RelativeEncoder rightEncoder = rightLeader.getEncoder();
 	private final SparkClosedLoopController leftController = leftLeader.getClosedLoopController();
 	private final SparkClosedLoopController rightController = rightLeader.getClosedLoopController();
 
@@ -78,18 +76,12 @@ public class DriveIOSpark implements DriveIO {
 
 	@Override
 	public void updateInputs(DriveIOInputs inputs) {
-		ifOk(leftLeader, leftEncoder::getPosition, value -> inputs.leftPosition.mut_replace(Radians.of(value)));
-		ifOk(leftLeader, leftEncoder::getVelocity,
-				value -> inputs.leftAngularVelocity.mut_replace(RadiansPerSecond.of(value)));
 		ifOk(
 				leftLeader,
 				new DoubleSupplier[] { leftLeader::getAppliedOutput, leftLeader::getBusVoltage },
 				values -> inputs.leftAppliedVoltage.mut_replace(Volts.of(values[0] * values[1])));
 		ifOk(leftLeader, leftLeader::getOutputCurrent, value -> inputs.leftCurrent.mut_replace(Amps.of(value)));
 
-		ifOk(rightLeader, rightEncoder::getPosition, value -> inputs.rightPosition.mut_replace(Radians.of(value)));
-		ifOk(rightLeader, rightEncoder::getVelocity,
-				value -> inputs.rightAngularVelocity.mut_replace(RadiansPerSecond.of(value)));
 		ifOk(
 				rightLeader,
 				new DoubleSupplier[] { rightLeader::getAppliedOutput, rightLeader::getBusVoltage },

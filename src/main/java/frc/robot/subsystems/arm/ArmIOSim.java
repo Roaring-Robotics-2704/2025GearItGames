@@ -9,6 +9,7 @@ import static frc.robot.subsystems.arm.ArmConstants.ARM_CONSTRAINTS;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.ProfiledPIDController;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.Voltage;
 import edu.wpi.first.wpilibj.Encoder;
@@ -60,7 +61,7 @@ public class ArmIOSim implements ArmIO {
 			ArmConstants.kMinAngleRads,
 			ArmConstants.kMaxAngleRads,
 			true,
-			0,
+			Units.degreesToRadians(90),
 			ArmConstants.kArmEncoderDistPerPulse,
 			0.0 // Add noise with a std-dev of 1 tick
 	);
@@ -132,6 +133,8 @@ public class ArmIOSim implements ArmIO {
 		// Update visualization
 		armMech.setAngle(inputs.Position.in(Degrees));
 		currentPosition = inputs.Position;
+		inputs.atSetpoint = MathUtil.isNear(targetPosition.in(Degrees), currentPosition.in(Degrees),
+		ArmConstants.tolerance.in(Degrees));
 	}
 
 	@Override
@@ -147,10 +150,5 @@ public class ArmIOSim implements ArmIO {
 		armMotor.setVoltage(output * 12);
 	}
 
-	@Override
-	public boolean atSetpoint() {
-		return MathUtil.isNear(targetPosition.in(Degrees), currentPosition.in(Degrees),
-				ArmConstants.tolerance.in(Degrees));
-	}
 
 }

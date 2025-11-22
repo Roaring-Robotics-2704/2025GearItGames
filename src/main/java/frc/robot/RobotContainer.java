@@ -20,6 +20,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
+import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
 import frc.robot.commands.DriveCommands;
 import frc.robot.subsystems.SuperStructure;
 import frc.robot.subsystems.SuperStructureConstants.SuperStructureState;
@@ -31,12 +32,13 @@ import frc.robot.subsystems.drive.Drive;
 import frc.robot.subsystems.drive.DriveIO;
 import frc.robot.subsystems.drive.DriveIOSim;
 import frc.robot.subsystems.drive.DriveIOTalonSRX;
-import frc.robot.subsystems.drive.GyroIO;
-import frc.robot.subsystems.drive.GyroIOPigeon2;
 import frc.robot.subsystems.gripper.Gripper;
 import frc.robot.subsystems.gripper.GripperIO;
 import frc.robot.subsystems.gripper.GripperIOReal;
 import frc.robot.subsystems.gripper.GripperIOSim;
+
+import static edu.wpi.first.units.Units.Seconds;
+import static edu.wpi.first.units.Units.Volts;
 
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
@@ -51,7 +53,7 @@ public class RobotContainer {
 	private final Drive drive;
 	private final Arm arm;
 	private final Gripper gripper;
-	private final SuperStructure superStructure;
+	// private final SuperStructure superStructure;
 
 	// Controller
 	private final CommandXboxController controller = new CommandXboxController(0);
@@ -66,15 +68,14 @@ public class RobotContainer {
 		switch (Constants.currentMode) {
 			case REAL:
 				// Real robot, instantiate hardware IO implementations
-				drive = new Drive(new DriveIOTalonSRX(), new GyroIOPigeon2());
-				arm = new Arm(new ArmIO() {});
+				drive = new Drive(new DriveIOTalonSRX());
+				arm = new Arm(new ArmIOReal());
 				gripper = new Gripper(new GripperIOReal());
 				break;
 
 			case SIM:
 				// Sim robot, instantiate physics sim IO implementations
-				drive = new Drive(new DriveIOSim(), new GyroIO() {
-				});
+				drive = new Drive(new DriveIOSim());
 				arm = new Arm(new ArmIOSim());
 				gripper = new Gripper(new GripperIOSim());
 				break;
@@ -82,7 +83,6 @@ public class RobotContainer {
 			default:
 				// Replayed robot, disable IO implementations
 				drive = new Drive(new DriveIO() {
-				}, new GyroIO() {
 				});
 				arm = new Arm(new ArmIO() {
 				});
@@ -90,24 +90,14 @@ public class RobotContainer {
 				});
 				break;
 		}
-		superStructure = new SuperStructure(arm, gripper);
+		// superStructure = new SuperStructure(arm, gripper);
 
 		// Set up auto routines
-		autoChooser = new LoggedDashboardChooser<>("Auto Choices", AutoBuilder.buildAutoChooser());
+		autoChooser = new LoggedDashboardChooser<>("Auto Choices");
+		autoChooser.addDefaultOption("Drive forward 3 seconds", DriveCommands.driveForward(drive, Seconds.of(3)).withName("Drive Forward 3 Seconds"));
+		autoChooser.addOption("None", Commands.none().withName("If this is running, we were either too rushed to add any autos or for some reason the driver didn't want to run one"));
 
-		// Set up SysId routines
-		autoChooser.addOption(
-				"Drive Simple FF Characterization", DriveCommands.feedforwardCharacterization(drive));
-		autoChooser.addOption(
-				"Drive SysId (Quasistatic Forward)",
-				drive.sysIdQuasistatic(SysIdRoutine.Direction.kForward));
-		autoChooser.addOption(
-				"Drive SysId (Quasistatic Reverse)",
-				drive.sysIdQuasistatic(SysIdRoutine.Direction.kReverse));
-		autoChooser.addOption(
-				"Drive SysId (Dynamic Forward)", drive.sysIdDynamic(SysIdRoutine.Direction.kForward));
-		autoChooser.addOption(
-				"Drive SysId (Dynamic Reverse)", drive.sysIdDynamic(SysIdRoutine.Direction.kReverse));
+
 
 		// Configure the button bindings
 		configureButtonBindings();
@@ -124,19 +114,24 @@ public class RobotContainer {
 		drive.setDefaultCommand(
 				DriveCommands.arcadeDrive(
 						drive, controller::getLeftY, controller::getRightX).withName("Arcade Drive"));
-		controller.leftTrigger().whileTrue(
-				superStructure.gotoState(
-						SuperStructureState.INTAKE_UPRIGHT).withName("Driver Intake Upright"))
-				.onFalse(
-						Commands.sequence(
-								superStructure.gotoState(
-										SuperStructureState.INTAKE_UPRIGHT_GRAB).withName("Driver Intake Upright Grab"),
-								superStructure.gotoState(SuperStructureState.HOLDING).withName("Driver Holding")));
-		controller.rightTrigger().whileTrue(
-				Commands.sequence(
-						superStructure.gotoState(SuperStructureState.OUTTAKING_HOLD).withName("Driver Outtaking Hold"),
-						superStructure.gotoState(SuperStructureState.OUTTAKING).withName("Driver Outtaking"),
-						superStructure.gotoState(SuperStructureState.DEFAULT_STATE).withName("Driver Default State")));
+		controller.y().whileTrue(arm.setVoltage(Volts.of(12)));
+		controller.a().whileTrue(arm.setVoltage(Volts.of(-4)));
+		controller.a().negate().and(controller.y().negate()).whileTrue(arm.setVoltage(Volts.of(3.5)));
+		controller.leftTrigger().whileTrue(gripper.setGripper(false));
+		controller.rightTrigger().whileTrue(gripper.setGripper(true));
+		// controller.leftTrigger().whileTrue(
+		// 		superStructure.gotoState(
+		// 				SuperStructureState.INTAKE_UPRIGHT).withName("Driver Intake Upright"))
+		// 		.onFalse(
+		// 				Commands.sequence(
+		// 						superStructure.gotoState(
+		// 								SuperStructureState.INTAKE_UPRIGHT_GRAB).withName("Driver Intake Upright Grab"),
+		// 						superStructure.gotoState(SuperStructureState.HOLDING).withName("Driver Holding")));
+		// controller.rightTrigger().whileTrue(
+		// 		Commands.sequence(
+		// 				superStructure.gotoState(SuperStructureState.OUTTAKING_HOLD).withName("Driver Outtaking Hold"),
+		// 				superStructure.gotoState(SuperStructureState.OUTTAKING).withName("Driver Outtaking"),
+		// 				superStructure.gotoState(SuperStructureState.DEFAULT_STATE).withName("Driver Default State")));
 
 	}
 

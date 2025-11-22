@@ -13,8 +13,8 @@ import static edu.wpi.first.units.Units.Volts;
 public class GripperConstants {
     public static final int GRIPPER_MOTOR_ID = 4;
 
-    public static final Voltage GRIPPER_OPEN_VOLTAGE = Volts.of(2.0);
-    public static final Voltage GRIPPER_CLOSE_VOLTAGE = Volts.of(-2.0);
-    public static final Current CURRENT_LIMIT = Amps.of(5.0);
-    public static final Current TOLERANCE = Amps.of(1.0);
+    public static final Voltage GRIPPER_OPEN_VOLTAGE = Volts.of(2);
+    public static final Voltage GRIPPER_CLOSE_VOLTAGE = Volts.of(-12.0);
+    public static final Current CURRENT_LIMIT = Amps.of(20.0);
+    public static final Current TOLERANCE = Amps.of(10.0);
 }

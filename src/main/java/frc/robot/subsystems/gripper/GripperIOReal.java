@@ -31,6 +31,7 @@ public class GripperIOReal implements GripperIO {
         config.peakCurrentLimit = (int)CURRENT_LIMIT.in(Amps) + 10;
         gripperMotor.configAllSettings(config);
         gripperMotor.enableVoltageCompensation(true);
+        
     }
 
     @Override
@@ -38,14 +39,12 @@ public class GripperIOReal implements GripperIO {
         currentCurrent = Amps.of(gripperMotor.getStatorCurrent());
         inputs.voltage.mut_replace(Volts.of(gripperMotor.getMotorOutputVoltage()));
         inputs.current.mut_replace(Amps.of(gripperMotor.getStatorCurrent()));
+        inputs.atSetpoint = (Math.abs(currentCurrent.in(Amps)) >= 50);
     }
 
     @Override
     public void setVoltage(Voltage voltage) {
         gripperMotor.set(ControlMode.PercentOutput, voltage.in(Volts) / 12.0);
     }
-    @Override
-    public boolean atSetpoint() {
-        return MathUtil.isNear(currentCurrent.in(Amps), CURRENT_LIMIT.in(Amps), TOLERANCE.in(Amps));
-    }
+
 }

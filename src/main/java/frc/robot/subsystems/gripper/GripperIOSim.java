@@ -18,8 +18,5 @@ public class GripperIOSim implements GripperIO {
     public void setVoltage(edu.wpi.first.units.measure.Voltage voltage) {
     }
 
-    @Override
-    public boolean atSetpoint() {
-        return true;
-    }
+
 }

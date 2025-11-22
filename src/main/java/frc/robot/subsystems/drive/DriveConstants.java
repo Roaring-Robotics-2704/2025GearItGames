@@ -19,6 +19,7 @@ import static edu.wpi.first.units.Units.Meter;
 import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.MetersPerSecond;
 import static edu.wpi.first.units.Units.Second;
+import static edu.wpi.first.units.Units.Volts;
 import static edu.wpi.first.units.Units.Inches;
 
 import com.pathplanner.lib.config.ModuleConfig;
@@ -32,9 +33,10 @@ import edu.wpi.first.units.measure.LinearVelocity;
 import edu.wpi.first.units.measure.Mass;
 import edu.wpi.first.units.measure.MomentOfInertia;
 import edu.wpi.first.units.measure.Velocity;
+import edu.wpi.first.units.measure.Voltage;
 
 public class DriveConstants {
-	public static final LinearVelocity maxSpeed = MetersPerSecond.of(4.0);
+	public static final Voltage maxVoltage = Volts.of(12);
 	public static final Distance trackWidth = Inches.of(20);
 
 	// Device CAN IDs
@@ -60,15 +62,4 @@ public class DriveConstants {
 	public static final Mass robotMass = Kilograms.of(74.088);
 	public static final double robotMOI = 6.883;
 	public static final double wheelCOF = 1.2;
-	public static final RobotConfig ppConfig = new RobotConfig(
-			robotMass.in(Kilograms),
-			robotMOI,
-			new ModuleConfig(
-					wheelRadius.in(Meters),
-					maxSpeed.in(MetersPerSecond),
-					wheelCOF,
-					gearbox.withReduction(motorReduction),
-					currentLimit.in(Amps),
-					1),
-			trackWidth.in(Meters));
 }

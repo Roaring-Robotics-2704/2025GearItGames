@@ -4,12 +4,15 @@
 
 package frc.robot.subsystems.gripper;
 
+import static edu.wpi.first.units.Units.Volts;
 import static frc.robot.subsystems.gripper.GripperConstants.GRIPPER_CLOSE_VOLTAGE;
 import static frc.robot.subsystems.gripper.GripperConstants.GRIPPER_OPEN_VOLTAGE;
 
 import org.littletonrobotics.junction.Logger;
 
 import edu.wpi.first.units.measure.Voltage;
+import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.subsystems.arm.ArmIO;
 import frc.robot.subsystems.arm.ArmIOInputsAutoLogged;
@@ -33,7 +36,7 @@ public class Gripper extends SubsystemBase {
 		// This method will be called once per scheduler run
 	}
 	public boolean atSetpoint() {
-		return gripperIO.atSetpoint();
+		return inputs.atSetpoint;
 	}
 	public void setVoltage(Voltage voltage) {
 		gripperIO.setVoltage(voltage);
@@ -44,5 +47,8 @@ public class Gripper extends SubsystemBase {
 		} else {
 			setVoltage(GRIPPER_OPEN_VOLTAGE);
 		}
+	}
+	public Command setGripper(boolean closed) {
+		return Commands.either(Commands.run(()->setGripperClosed(closed)) , Commands.run(()->setGripperClosed(false)).finallyDo((()->setVoltage(Volts.zero()))),()->closed);
 	}
 }

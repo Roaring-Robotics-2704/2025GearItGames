@@ -29,6 +29,7 @@ public interface ArmIO {
 		public MutAngularVelocity Velocity = DegreesPerSecond.zero().mutableCopy();
 		public MutVoltage Voltage = Volts.zero().mutableCopy();
 		public MutCurrent Current = Amps.zero().mutableCopy();
+		public boolean atSetpoint = true;
 
 	}
 
@@ -43,8 +44,4 @@ public interface ArmIO {
 	public default void setAngle(Angle angle) {
 	}
 	
-	@AutoLogOutput
-	public default boolean atSetpoint() {
-		return true;
-	}
 }
