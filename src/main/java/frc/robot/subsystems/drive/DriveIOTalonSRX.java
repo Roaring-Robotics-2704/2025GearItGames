@@ -57,9 +57,22 @@ public class DriveIOTalonSRX implements DriveIO {
 
 	@Override
 	public void updateInputs(DriveIOInputs inputs) {
+		inputs.leftPosition.mut_replace(Rotations.of(leftLeader.getSelectedSensorPosition() / tickPerRevolution));
+		inputs.leftAngularVelocity.mut_replace(
+				RotationsPerSecond.of(
+						leftLeader.getSelectedSensorVelocity()
+								/ tickPerRevolution
+								* 10.0)); // Raw units are ticks per 100ms :(
 		inputs.leftAppliedVoltage.mut_replace(Volts.of(leftLeader.getMotorOutputVoltage()));
 		inputs.leftCurrent.mut_replace(Amps.of(leftLeader.getStatorCurrent()));
 
+		inputs.rightPosition.mut_replace(
+				Rotations.of(rightLeader.getSelectedSensorPosition() / tickPerRevolution));
+		inputs.rightAngularVelocity.mut_replace(
+				RotationsPerSecond.of(
+						rightLeader.getSelectedSensorVelocity()
+								/ tickPerRevolution
+								* 10.0)); // Raw units are ticks per 100ms :(
 		inputs.rightAppliedVoltage.mut_replace(Volts.of(rightLeader.getMotorOutputVoltage()));
 		inputs.rightCurrent.mut_replace(Amps.of(rightLeader.getStatorCurrent()));
 	}
@@ -68,7 +81,7 @@ public class DriveIOTalonSRX implements DriveIO {
 	public void setVoltage(Voltage leftVoltage, Voltage rightVoltage) {
 		// OK to just divide by 12 because voltage compensation is enabled
 		leftLeader.set(TalonSRXControlMode.PercentOutput, leftVoltage.in(Volts) / 12.0);
-		rightLeader.set(TalonSRXControlMode.PercentOutput, rightVoltage.in(Volts) / 12.0 * 0.8);
+		rightLeader.set(TalonSRXControlMode.PercentOutput, rightVoltage.in(Volts) / 12.0);
 	}
 
 	@Override
